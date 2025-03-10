@@ -1,0 +1,79 @@
+.welcome-text {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.welcome-text h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.welcome-text p {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.login-form {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-form h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.login-form ion-input {
+  background-color: #f4f4f4;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  padding: 10px !important;
+}
+
+.login-button {
+  --background: #3880ff;
+  --border-radius: 10px;
+  font-weight: bold;
+}
+
+.login-via {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-via ion-text {
+  font-size: 1rem;
+  color: #666;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.social-buttons ion-button {
+  --background: transparent;
+  --box-shadow: none;
+}
+
+.social-buttons ion-icon {
+  font-size: 2rem;
+  color: #3880ff;
+}
+
+.sign-up {
+  text-align: center;
+}
+
+.sign-up ion-text {
+  font-size: 1rem;
+  color: #666;
+}
+
+.sign-up a {
+  color: #3880ff;
+  text-decoration: none;
+  font-weight: bold;
+}
