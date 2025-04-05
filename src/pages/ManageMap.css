@@ -1,0 +1,105 @@
+.map-list-container {
+    background: #1a1a1a;
+    min-height: 100vh;
+    padding: 15px;
+    color: #ffffff;
+  }
+  
+  .header-toolbar {
+    --background: #252526;
+    --color: #ffffff;
+    border-bottom: 1px solid #333;
+  }
+  
+  .map-table {
+    background: #252526;
+    border-radius: 8px;
+    margin-top: 15px;
+    overflow: hidden;
+    border: 1px solid #404040;
+  }
+  
+  .table-header {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr; /* Proportions fixes pour les colonnes */
+    padding: 10px 15px;
+    background: #333333;
+    border-bottom: 1px solid #404040;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+    color: #cccccc;
+  }
+  
+  .map-item {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr; /* Identique à table-header */
+    padding: 10px 15px;
+    border-bottom: 1px solid #404040;
+    align-items: center;
+  }
+  
+  .map-item:last-child {
+    border-bottom: none;
+  }
+  
+  .map-item ion-label {
+    color: #0d0a53;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left; /* Alignement à gauche pour plus de clarté */
+  }
+  
+  .add-button {
+    --background: #007acc;
+    --background-activated: #0066a1;
+    --border-radius: 6px;
+    margin-bottom: 15px;
+    height: 40px;
+  }
+  
+  .action-button {
+    --background: transparent;
+    --color: #007acc;
+    --padding-start: 5px;
+    --padding-end: 5px;
+  }
+  
+  .action-button:hover {
+    --color: #ffffff;
+  }
+  
+  .actions-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .modal-content {
+    --background: #252526;
+    --color: #ffffff;
+  }
+  
+  .modal-input {
+    --background: #2d2d2d;
+    --color: #ffffff;
+    --border-radius: 6px;
+    --padding-start: 15px;
+    --highlight-color-focused: #007acc;
+    margin: 10px 0;
+    border: 1px solid #404040;
+  }
+  
+  .save-button {
+    --background: #007acc;
+    --background-activated: #0066a1;
+    --border-radius: 6px;
+    margin: 15px;
+  }
+  
+  .file-input {
+    color: #ffffff;
+    padding: 10px 0;
+  }

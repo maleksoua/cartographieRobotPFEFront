@@ -9,7 +9,10 @@ import {
   IonIcon,
   IonToast,
   IonInput,
+  IonRange
 } from '@ionic/react';
+import { Joystick } from 'react-joystick-component';
+import axios from 'axios';
 import { useEffect, useState, useRef } from 'react';
 import './CardLive.css';
 import { play, save } from 'ionicons/icons';
@@ -19,49 +22,59 @@ const CardLive: React.FC = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [name, setName] = useState('');
   const imageRef = useRef<HTMLImageElement>(null);
+  const [speed, setSpeed] = useState(0.5);
 
-  // Rafraîchir l'image toutes les 500 ms sans re-rendering
+  const sendCommand = async (command: string) => {
+    try {
+      const payload = { command, speed };
+      await axios.post('http://localhost:3001/api/robot/move', payload);
+      setToastMessage(`Robot: ${command}`);
+      setShowToast(true);
+    } catch (error) {
+      setToastMessage('Erreur de contrôle');
+      setShowToast(true);
+    }
+  };
+
+  const handleMove = (event: any) => {
+    const { x, y } = event;
+    const threshold = 0.5;
+    if (y > threshold) sendCommand('up');
+    else if (y < -threshold) sendCommand('down');
+    else if (x > threshold) sendCommand('right');
+    else if (x < -threshold) sendCommand('left');
+    else sendCommand('stop');
+  };
+
+  const handleStop = () => sendCommand('stop');
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (imageRef.current) {
         imageRef.current.src = `http://localhost:3001/map_live.png?timestamp=${Date.now()}`;
       }
     }, 500);
-
     return () => clearInterval(interval);
   }, []);
-  //slam
-    // Fonction pour démarrer SLAM
-    const startSlam = async () => {
-      try {
-        const response = await fetch('http://localhost:3001/api/start-slam', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            topic: 'robot/slam/status',
-            message: 'SLAM Started',
-          }),
-        });
-  
-        if (response.ok) {
-          setToastMessage('SLAM démarré avec succès !');
-          setShowToast(true);
-        } else {
-          setToastMessage('Erreur lors du démarrage de SLAM.');
-          setShowToast(true);
-        }
-      } catch (error) {
-        console.error('Erreur:', error);
-        setToastMessage('Erreur de connexion au serveur.');
-        setShowToast(true);
-      }
-    };
+
+  const startSlam = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/start-slam', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: 'robot/slam/status', message: 'SLAM Started' }),
+      });
+      setToastMessage(response.ok ? 'SLAM Activé' : 'Erreur SLAM');
+      setShowToast(true);
+    } catch (error) {
+      setToastMessage('Erreur serveur');
+      setShowToast(true);
+    }
+  };
 
   const saveMap = async () => {
     if (!name) {
-      setToastMessage('Veuillez entrer un nom pour la carte.');
+      setToastMessage('Nom requis');
       setShowToast(true);
       return;
     }
@@ -69,78 +82,94 @@ const CardLive: React.FC = () => {
     try {
       const response = await fetch('http://localhost:3001/map_live.png');
       const blob = await response.blob();
+      const base64data = await blobToBase64(blob);
+      
+      const saveResponse = await fetch('http://localhost:3001/api/map/save-live-map-no-robot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64data, name }),
+      });
 
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = async () => {
-        const base64data = reader.result;
-
-        try {
-          const saveResponse = await fetch('http://localhost:3001/api/map/save', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              image: base64data,
-              name: name,
-            }),
-          });
-
-          if (saveResponse.ok) {
-            setToastMessage('Carte sauvegardée avec succès !');
-            setShowToast(true);
-          } else {
-            setToastMessage('Erreur lors de la sauvegarde de la carte.');
-            setShowToast(true);
-          }
-        } catch (error) {
-          console.error('Erreur lors de la sauvegarde :', error);
-          setToastMessage('Erreur de connexion au serveur.');
-          setShowToast(true);
-        }
-      };
+      setToastMessage(saveResponse.ok ? 'Carte sauvegardée' : 'Erreur sauvegarde');
+      setShowToast(true);
     } catch (error) {
-      console.error('Erreur lors de la récupération de l\'image :', error);
-      setToastMessage('Erreur lors de la récupération de l\'image.');
+      setToastMessage('Erreur serveur');
       setShowToast(true);
     }
+  };
+
+  const blobToBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
   };
 
   return (
     <IonPage id="main-content">
       <IonHeader>
-        <IonToolbar>
+        <IonToolbar className="header-toolbar">
           <IonMenuButton slot="start" />
-          <IonTitle>Carte en direct</IonTitle>
+          <IonTitle>Robot Live Map</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
-        <IonButton onClick={saveMap}>
-          <IonIcon icon={save} />
-        </IonButton>
-        <IonButton onClick={startSlam}>
-          <IonIcon icon={play} />
-        </IonButton>
-        <div className="login-form">
-          <IonInput
-            type="text"
-            placeholder="Name"
-            value={name}
-            onIonChange={(e) => setName(e.detail.value!)}
-            className="ion-margin-bottom"
+      <IonContent className="robot-control-container">
+        <div className="map-container">
+          <img ref={imageRef} className="live-map" alt="Robot Live Map" />
+        </div>
+
+        <div className="control-section">
+          <div className="joystick-panel">
+            <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>Contrôle</h3>
+            <div className="joystick-container">
+              <Joystick
+                baseColor="#333333"
+                stickColor="#007acc"
+                move={handleMove}
+                stop={handleStop}
+                size={120}
+              />
+            </div>
+          </div>
+
+          <div className="control-buttons">
+            <IonButton className="robot-button" onClick={startSlam}>
+              <IonIcon slot="start" icon={play} />
+              SLAM
+            </IonButton>
+            <IonButton className="robot-button" onClick={saveMap}>
+              <IonIcon slot="start" icon={save} />
+              Sauvegarder
+            </IonButton>
+            <IonInput
+              className="map-input"
+              type="text"
+              placeholder="Nom carte"
+              value={name}
+              onIonChange={(e) => setName(e.detail.value!)}
+            />
+          </div>
+        </div>
+
+        <div className="speed-panel">
+          <p>Vitesse: {speed.toFixed(1)}</p>
+          <IonRange
+            min={0}
+            max={1}
+            step={0.1}
+            value={speed}
+            onIonChange={(e) => setSpeed(e.detail.value as number)}
           />
         </div>
-        <img
-          ref={imageRef}
-          src={`http://localhost:3001/map_live.png?timestamp=${Date.now()}`}
-          alt="Carte en direct"
-        />
+
         <IonToast
           isOpen={showToast}
           onDidDismiss={() => setShowToast(false)}
           message={toastMessage}
-          duration={2000}
+          duration={1500}
+          position="bottom"
+          cssClass="status-toast"
         />
       </IonContent>
     </IonPage>

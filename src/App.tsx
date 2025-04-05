@@ -29,7 +29,8 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
-import ControlPage from './pages/ControlRobot';
+import Mission from './pages/Mission';
+
 
 setupIonicReact();
 
@@ -42,7 +43,7 @@ const App: React.FC = () => (
         <ProtectedRoute exact path="/home" component={Home} />
         <ProtectedRoute exact path="/cardlive" component={CardLive} />
         <ProtectedRoute exact path="/robotnotadded" component={RobotNotAdded} />
-        <ProtectedRoute exact path="/controlrobot" component={ControlPage} />
+        <ProtectedRoute exact path="/sendmap" component={Mission} />
         <ProtectedRoute exact path="/listrobot" component={ListRobotFinal} />
         <ProtectedRoute exact path="/Imageeditor" component={ImageEditor} />
         <ProtectedRoute exact path="/listmap" component={ListMap} />

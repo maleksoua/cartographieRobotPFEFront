@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IonButton, IonIcon, IonContent, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonItem, IonLabel, IonInput } from '@ionic/react';
-import { Stage, Layer, Image, Circle } from 'react-konva';
-import { closeCircle, returnUpForward, cloudUpload } from 'ionicons/icons';
+import { Stage, Layer, Image, Circle, Line } from 'react-konva';
+import { closeCircle, returnUpForward, cloudUpload, saveOutline } from 'ionicons/icons';
 
 const ImageEditorModal: React.FC<{
   imageUrl: string;
@@ -10,8 +10,11 @@ const ImageEditorModal: React.FC<{
   onClose: () => void;
 }> = ({ imageUrl, initialFilename, onSave, onClose }) => {
   const [isEraserActive, setIsEraserActive] = useState(false);
+  const [isPencilActive, setIsPencilActive] = useState(false);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
-  const [eraserCircles, setEraserCircles] = useState<Array<{ x: number; y: number; radius: number }>>([]);
+  const [circles, setCircles] = useState<Array<{ x: number; y: number; radius: number; color: string }>>([]);
+  const [lines, setLines] = useState<Array<{ points: number[]; color: string }>>([]);
+  const [isDrawing, setIsDrawing] = useState(false);
   const [filename, setFilename] = useState(initialFilename);
   const stageRef = useRef<any>(null);
 
@@ -19,7 +22,7 @@ const ImageEditorModal: React.FC<{
   useEffect(() => {
     const img = new window.Image();
     img.src = imageUrl;
-    img.crossOrigin = 'Anonymous'; // Autoriser l'exportation du canvas
+    img.crossOrigin = 'Anonymous';
     img.onload = () => {
       setImage(img);
     };
@@ -28,38 +31,74 @@ const ImageEditorModal: React.FC<{
   // Activer/désactiver la gomme
   const toggleEraser = () => {
     setIsEraserActive(!isEraserActive);
+    if (isPencilActive) setIsPencilActive(false);
   };
 
-  // Gestion du clic pour la gomme
-  const handleClick = (e: any) => {
-    if (isEraserActive && stageRef.current) {
+  // Activer/désactiver le crayon noir
+  const togglePencil = () => {
+    setIsPencilActive(!isPencilActive);
+    if (isEraserActive) setIsEraserActive(false);
+  };
+
+  // Début du dessin
+  const handleMouseDown = (e: any) => {
+    if (stageRef.current) {
       const stage = stageRef.current;
       const pointer = stage.getPointerPosition();
 
-      // Ajouter un nouveau cercle à la liste des cercles de gomme
-      setEraserCircles((prevCircles) => [
-        ...prevCircles,
-        {
-          x: pointer.x,
-          y: pointer.y,
-          radius: 10,
-        },
-      ]);
+      if (isEraserActive) {
+        setCircles((prevCircles) => [
+          ...prevCircles,
+          { x: pointer.x, y: pointer.y, radius: 10, color: 'white' },
+        ]);
+      } else if (isPencilActive) {
+        setIsDrawing(true);
+        setLines((prevLines) => [
+          ...prevLines,
+          { points: [pointer.x, pointer.y], color: 'black' },
+        ]);
+      }
     }
   };
 
-  // Annuler le dernier cercle dessiné
+  // Dessin en cours
+  const handleMouseMove = (e: any) => {
+    if (!isDrawing || !isPencilActive || !stageRef.current) return;
+
+    const stage = stageRef.current;
+    const pointer = stage.getPointerPosition();
+
+    setLines((prevLines) => {
+      const lastLine = prevLines[prevLines.length - 1];
+      const updatedLines = prevLines.slice(0, -1);
+      return [
+        ...updatedLines,
+        { ...lastLine, points: [...lastLine.points, pointer.x, pointer.y] },
+      ];
+    });
+  };
+
+  // Fin du dessin
+  const handleMouseUp = () => {
+    setIsDrawing(false);
+  };
+
+  // Annuler la dernière action
   const handleUndo = () => {
-    if (eraserCircles.length > 0) {
-      setEraserCircles((prevCircles) => prevCircles.slice(0, -1));
+    if (isPencilActive && lines.length > 0) {
+      setLines((prevLines) => prevLines.slice(0, -1));
+    } else if (isEraserActive && circles.length > 0) {
+      setCircles((prevCircles) => prevCircles.slice(0, -1));
     }
   };
 
+  // Effacer tout
   const handleClearAll = () => {
-    setEraserCircles([]);
+    setCircles([]);
+    setLines([]);
   };
 
-  // Sauvegarder l'image modifiée
+  // Sauvegarder l'image modifiée (envoyer au parent)
   const handleSave = () => {
     const stage = stageRef.current;
     if (stage) {
@@ -67,12 +106,30 @@ const ImageEditorModal: React.FC<{
         mimeType: 'image/png',
         quality: 1,
       });
-  
-      // Envoyer l'image modifiée et le nouveau filename au parent
+
       onSave({
-        imageData: dataURL, // Assurez-vous que c'est bien une chaîne base64
+        imageData: dataURL,
         filename: filename,
       });
+    }
+  };
+
+  // Télécharger l'image modifiée sur le bureau (dossier Téléchargements)
+  const handleDownload = () => {
+    const stage = stageRef.current;
+    if (stage) {
+      const dataURL = stage.toDataURL({
+        mimeType: 'image/png',
+        quality: 1,
+      });
+
+      // Créer un lien temporaire pour le téléchargement
+      const link = document.createElement('a');
+      link.href = dataURL;
+      link.download = `${filename || 'edited_map'}.png`; // Nom du fichier avec extension
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -99,45 +156,66 @@ const ImageEditorModal: React.FC<{
         {/* Canvas pour l'image */}
         <Stage
           ref={stageRef}
-          width={500}
-          height={500}
-          onClick={handleClick}
+          width={384}
+          height={384}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
         >
           <Layer>
             {image && (
               <Image
                 image={image}
-                width={500}
-                height={500}
-                draggable={!isEraserActive}
+                width={384}
+                height={384}
+                draggable={!isEraserActive && !isPencilActive}
               />
             )}
-            {eraserCircles.map((circle, index) => (
+            {/* Affichage des cercles (gomme) */}
+            {circles.map((circle, index) => (
               <Circle
                 key={index}
                 x={circle.x}
                 y={circle.y}
                 radius={circle.radius}
-                fill="white"
-                stroke="white"
+                fill={circle.color}
+                stroke={circle.color}
                 strokeWidth={2}
+              />
+            ))}
+            {/* Affichage des lignes (crayon) */}
+            {lines.map((line, index) => (
+              <Line
+                key={index}
+                points={line.points}
+                stroke={line.color}
+                strokeWidth={2}
+                tension={0.5}
+                lineCap="round"
+                lineJoin="round"
               />
             ))}
           </Layer>
         </Stage>
 
-        {/* Boutons pour gérer la gomme, annuler, effacer tout et sauvegarder */}
+        {/* Boutons pour gérer la gomme, le crayon, annuler, effacer tout, sauvegarder et télécharger */}
         <IonButton onClick={toggleEraser}>
           {isEraserActive ? 'Désactiver la gomme' : 'Activer la gomme'}
         </IonButton>
-        <IonButton onClick={handleUndo} disabled={eraserCircles.length === 0}>
+        <IonButton onClick={togglePencil}>
+          {isPencilActive ? 'Désactiver le crayon' : 'Activer le crayon noir'}
+        </IonButton>
+        <IonButton onClick={handleUndo} disabled={circles.length === 0 && lines.length === 0}>
           <IonIcon icon={returnUpForward} />
         </IonButton>
-        <IonButton onClick={handleClearAll} disabled={eraserCircles.length === 0}>
+        <IonButton onClick={handleClearAll} disabled={circles.length === 0 && lines.length === 0}>
           <IonIcon icon={closeCircle} />
         </IonButton>
         <IonButton onClick={handleSave}>
           <IonIcon icon={cloudUpload} />
+        </IonButton>
+        <IonButton onClick={handleDownload}>
+          <IonIcon icon={saveOutline} />
         </IonButton>
       </IonContent>
     </IonModal>

@@ -88,7 +88,7 @@ const RobotList: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonMenuButton slot="start" />
-          <IonTitle>Liste des Robots</IonTitle>
+          <IonTitle>Liste des Robots Connectes</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent>

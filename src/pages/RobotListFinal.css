@@ -1,0 +1,99 @@
+.robot-list-container {
+    background: #a9f4ec;
+    min-height: 100vh;
+    padding: 15px;
+    color: #ffffff;
+  }
+  
+  .header-toolbar {
+    --background: #819898;
+    --color: #ffffff;
+    border-bottom: 1px solid #333;
+  }
+  
+  .robot-table {
+    background: #819898;
+    border-radius: 8px;
+    margin-top: 15px;
+    overflow: hidden;
+    border: 1px solid #404040;
+  }
+  
+  .table-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr 1fr 1fr; /* Même proportions pour l'en-tête et les lignes */
+    padding: 10px 15px;
+    background: #819898;
+    border-bottom: 1px solid #404040;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+    color: #cccccc;
+  }
+  
+  .robot-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr 1fr 1fr; /* Doit correspondre exactement à table-header */
+    padding: 10px 15px;
+    border-bottom: 1px solid #404040;
+    align-items: center;
+  }
+  
+  .robot-item:last-child {
+    border-bottom: none;
+  }
+  
+  .robot-item ion-label {
+    color: #340747;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .add-button {
+    --background: #FF5342;
+    --background-activated: #0066a1;
+    --border-radius: 6px;
+    margin-bottom: 15px;
+    height: 40px;
+  }
+  
+  .action-button {
+    --background: transparent;
+    --color: #FF9563;
+    --padding-start: 5px;
+    --padding-end: 5px;
+  }
+  
+  .action-button:hover {
+    --color: #ffffff;
+  }
+  
+  .actions-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .modal-content {
+    --background: #252526;
+    --color: #ffffff;
+  }
+  
+  .modal-input {
+    --background: #FFC288;
+    --color: #ffffff;
+    --border-radius: 6px;
+    --padding-start: 15px;
+    --highlight-color-focused: #007acc;
+    margin: 10px 0;
+    border: 1px solid #404040;
+  }
+  
+  .save-button {
+    --background: #007acc;
+    --background-activated: #0066a1;
+    --border-radius: 6px;
+    margin: 15px;
+  }

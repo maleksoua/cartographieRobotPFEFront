@@ -16,9 +16,7 @@ const Sidebar: React.FC = () => {
             <IonItem routerLink="/cardlive">
               <IonLabel>CardLive</IonLabel>
             </IonItem>
-            <IonItem routerLink="/controlrobot">
-              <IonLabel>ContolRobot</IonLabel>
-            </IonItem>
+           
             <IonItem routerLink="/RobotNotAdded">
               <IonLabel>RobotNotAdded</IonLabel>
             </IonItem>
@@ -30,6 +28,9 @@ const Sidebar: React.FC = () => {
             </IonItem>
             <IonItem routerLink="/Imageeditor">
               <IonLabel>ImageEditor</IonLabel>
+            </IonItem>
+            <IonItem routerLink="/SendMap">
+              <IonLabel>SendMap</IonLabel>
             </IonItem>
           </IonList>
         </IonContent>

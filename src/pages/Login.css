@@ -1,79 +1,81 @@
-.welcome-text {
-  text-align: center;
+/* Ensure the IonContent has no default background overriding the image */
+.login-page {
+  --background: transparent !important; /* Override Ionic's default background */
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Wrapper for the background image */
+.background-wrapper {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Logo styling */
+.logo-container {
+  display: flex;
+  justify-content: center;
   margin-bottom: 2rem;
 }
 
-.welcome-text h1 {
-  font-size: 2.5rem;
-  font-weight: bold;
+.logo {
+  width: 120px; /* Adjust based on your logo size */
+  height: auto;
 }
 
-.welcome-text p {
-  font-size: 1.2rem;
-  color: #666;
+/* Login card styling */
+.login-card {
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent dark background to match Figma */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Login form styling */
 .login-form {
   text-align: center;
   margin-bottom: 2rem;
 }
 
-.login-form h2 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-}
-
-.login-form ion-input {
-  background-color: #f4f4f4;
-  border-radius: 10px;
+/* Custom input styling to match Figma */
+.custom-input {
+  background-color: #fff; /* White background for inputs */
+  border: 1px solid #ccc; /* Light border */
+  border-radius: 5px;
   margin-bottom: 1rem;
   padding: 10px !important;
-}
-
-.login-button {
-  --background: #3880ff;
-  --border-radius: 10px;
-  font-weight: bold;
-}
-
-.login-via {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.login-via ion-text {
   font-size: 1rem;
-  color: #666;
+  color: #333;
 }
 
-.social-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1rem;
+/* Login button styling to match Figma */
+.login-button {
+  --background: #00c4b4; /* Teal color from Figma */
+  --border-radius: 5px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-transform: uppercase;
 }
 
-.social-buttons ion-button {
-  --background: transparent;
-  --box-shadow: none;
-}
-
-.social-buttons ion-icon {
-  font-size: 2rem;
-  color: #3880ff;
-}
-
+/* Sign-up text styling */
 .sign-up {
   text-align: center;
 }
 
 .sign-up ion-text {
-  font-size: 1rem;
-  color: #666;
+  font-size: 0.9rem;
+  color: #fff; /* White text to contrast with the dark background */
 }
 
 .sign-up a {
-  color: #3880ff;
+  color: #00c4b4; /* Teal color for the link to match the button */
   text-decoration: none;
   font-weight: bold;
 }

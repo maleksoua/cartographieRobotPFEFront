@@ -10,15 +10,17 @@ import {
   IonGrid,
   IonRow,
   IonCol,
-  IonIcon,
   IonText,
   IonCard,
   IonCardContent,
 } from '@ionic/react';
-import { logoGoogle, logoFacebook, logoTwitter } from 'ionicons/icons';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import './Login.css';
+
+// Import the logo and background image
+import logo from '../../logo.png'// Replace with the actual path to your logo image
+import backgroundImage from '../../backrend.jpg'; // Replace with the actual path to your background image
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -39,59 +41,41 @@ const Login: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar>
-          <IonTitle>Login</IonTitle>
-        </IonToolbar>
+       
       </IonHeader>
-      <IonContent className="ion-padding">
+      <IonContent className="ion-padding login-page" style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover' }}>
         <IonGrid>
           <IonRow className="ion-justify-content-center">
             <IonCol size="12" sizeMd="8" sizeLg="6">
-              <IonCard>
+              <div className="logo-container">
+                <img src={logo} alt="Logo" className="logo" />
+               
+              </div>
+              <IonCard className="login-card">
                 <IonCardContent>
-                  <div className="welcome-text">
-                    <h1>Welcome</h1>
-                    <p>Please login to continue</p>
-                  </div>
-
                   <div className="login-form">
                     <IonInput
                       type="email"
                       placeholder="Email"
                       value={email}
                       onIonChange={(e) => setEmail(e.detail.value!)}
-                      className="ion-margin-bottom"
+                      className="custom-input ion-margin-bottom"
                     />
                     <IonInput
                       type="password"
                       placeholder="Password"
                       value={password}
                       onIonChange={(e) => setPassword(e.detail.value!)}
-                      className="ion-margin-bottom"
+                      className="custom-input ion-margin-bottom"
                     />
                     <IonButton expand="block" className="login-button" onClick={handleLogin}>
-                      Login
+                      Log In
                     </IonButton>
-                  </div>
-
-                  <div className="login-via">
-                    <IonText>Login Via</IonText>
-                    <div className="social-buttons">
-                      <IonButton fill="clear" className="social-button">
-                        <IonIcon icon={logoGoogle} />
-                      </IonButton>
-                      <IonButton fill="clear" className="social-button">
-                        <IonIcon icon={logoFacebook} />
-                      </IonButton>
-                      <IonButton fill="clear" className="social-button">
-                        <IonIcon icon={logoTwitter} />
-                      </IonButton>
-                    </div>
                   </div>
 
                   <div className="sign-up">
                     <IonText>
-                      Don't have an account? <a href="/signup">Sign Up</a>
+                      Don't have an account yet? <a href="/signup">Create an account</a>
                     </IonText>
                   </div>
                 </IonCardContent>

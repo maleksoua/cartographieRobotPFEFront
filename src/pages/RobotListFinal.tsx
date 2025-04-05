@@ -16,8 +16,9 @@ import {
   IonIcon,
   IonCol,
 } from '@ionic/react';
-import { pencil, trash, add } from 'ionicons/icons';
+import { pencil, trash, add, checkmarkCircle, closeCircle } from 'ionicons/icons';
 import { getRobotList, EditRobot, DeleteRobot, AddRobot } from '../services/robotService';
+import './RobotListFinal.css';
 
 const RobotList: React.FC = () => {
   const [robots, setRobots] = useState([]);
@@ -27,9 +28,8 @@ const RobotList: React.FC = () => {
   const [ip, setIp] = useState('');
   const [rosVersion, setRosVersion] = useState('');
   const [status, setStatus] = useState('');
-  const [isAdding, setIsAdding] = useState(false); // Nouvel état pour distinguer l'ajout de l'édition
+  const [isAdding, setIsAdding] = useState(false);
 
-  // Récupérer la liste des robots
   useEffect(() => {
     const fetchRobots = async () => {
       try {
@@ -42,50 +42,48 @@ const RobotList: React.FC = () => {
     fetchRobots();
   }, []);
 
-  // Mettre à jour le nom quand un robot est sélectionné
   useEffect(() => {
     if (selectedRobot) {
       setName(selectedRobot.name || '');
       setStatus(selectedRobot.status || '');
+      setIp(selectedRobot.ip || '');
+      setRosVersion(selectedRobot.rosVersion || '');
     }
   }, [selectedRobot]);
 
-  // Gérer l'ouverture du modal pour l'édition
   const handleEditClick = (robot: any) => {
     setSelectedRobot(robot);
-    setIsAdding(false); // Ce n'est pas une action d'ajout
+    setIsAdding(false);
     setShowModal(true);
   };
 
-  // Gérer l'ouverture du modal pour l'ajout
   const handleAddClick = () => {
-    setSelectedRobot(null); // Pas de robot sélectionné pour l'ajout
-    setIsAdding(true); // C'est une action d'ajout
-    setName(''); // Réinitialiser les champs
+    setSelectedRobot(null);
+    setIsAdding(true);
+    setName('');
     setStatus('');
+    setIp('');
+    setRosVersion('');
     setShowModal(true);
   };
 
   const handleDeleteClick = async (robot: any) => {
     try {
       await DeleteRobot(robot._id);
-      setRobots(robots.filter((r) => r._id !== robot._id));
-      console.log('Robot deleted successfully');
+      setRobots(robots.filter((r: any) => r._id !== robot._id));
     } catch (error) {
       console.error('Error deleting robot:', error);
     }
   };
 
-  // Gérer la sauvegarde des modifications ou l'ajout
   const handleSave = useCallback(async () => {
     const trimmedName = name.trim();
     const trimmedStatus = status.trim();
     const trimmedIp = ip.trim();
     const trimmedRosVersion = rosVersion.trim();
-    if (!trimmedName || !trimmedStatus) {
 
-
-      console.error('Erreur: champ du robot est vide');
+    if (!trimmedName || (!isAdding && !trimmedStatus) || (isAdding && (!trimmedIp || !trimmedRosVersion))) {
+      console.error('Erreur: champ requis vide');
       return;
     }
 
@@ -93,62 +91,78 @@ const RobotList: React.FC = () => {
       const robotData = {
         name: trimmedName,
         status: trimmedStatus,
-          ...(isAdding && { ip: trimmedIp,rosVersion:trimmedRosVersion }), // Inclure l'IP uniquement lors de l'ajout
+        ...(isAdding && { ip: trimmedIp, rosVersion: trimmedRosVersion }),
       };
 
       if (isAdding) {
-        console.log('Données envoyées:', robotData);
         const response = await AddRobot(robotData);
-        console.log('Données envoyées:', robotData);
-        console.log('Robot ajouté avec succès:', response);
-        setRobots([...robots, response]); // Ajouter le nouveau robot à la liste
+        setRobots([...robots, response]);
       } else {
         const response = await EditRobot(selectedRobot._id, robotData);
-        console.log('Robot modifié avec succès:', response);
-        setRobots(robots.map((r) => (r._id === selectedRobot._id ? response : r))); // Mettre à jour le robot dans la liste
+        setRobots(robots.map((r: any) => (r._id === selectedRobot._id ? response : r)));
       }
 
       setShowModal(false);
       setSelectedRobot(null);
       setName('');
       setStatus('');
+      setIp('');
+      setRosVersion('');
     } catch (error) {
       console.error('Erreur lors de l\'ajout/modification du robot:', error);
     }
-  }, [selectedRobot, name, status, isAdding, robots]);
+  }, [selectedRobot, name, status, ip, rosVersion, isAdding, robots]);
 
   return (
     <IonPage id="main-content">
       <IonHeader>
-        <IonToolbar>
+        <IonToolbar className="header-toolbar">
           <IonMenuButton slot="start" />
           <IonTitle>Liste des Robots</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
+      <IonContent className="robot-list-container">
         <IonCol size="12" sizeMd="8" sizeLg="6">
-          <IonButton onClick={handleAddClick}>
-            <IonIcon icon={add} />
+          <IonButton className="add-button" onClick={handleAddClick}>
+            <IonIcon slot="start" icon={add} />
+            Ajouter Robot
           </IonButton>
-          <IonList>
-            {robots.map((robot: any) => (
-              <IonItem key={robot._id}>
-                <IonLabel>{robot.ip}</IonLabel>
-                <IonLabel>{robot.rosVersion}</IonLabel>
-                <IonLabel>{robot.name}</IonLabel>
-                <IonLabel>{robot.status}</IonLabel>
-                <IonButton onClick={() => handleEditClick(robot)}>
-                  <IonIcon icon={pencil} />
-                </IonButton>
-                <IonButton onClick={() => handleDeleteClick(robot)}>
-                  <IonIcon icon={trash} />
-                </IonButton>
-              </IonItem>
-            ))}
-          </IonList>
+          <div className="robot-table">
+            <div className="table-header">
+              <IonLabel>Adresse IP</IonLabel>
+              <IonLabel>ROS Version</IonLabel>
+              <IonLabel>Nom</IonLabel>
+              <IonLabel>Statut</IonLabel>
+              <IonLabel>Actions</IonLabel>
+            </div>
+            <IonList>
+              {robots.map((robot: any) => (
+                <div className="robot-item" key={robot._id}>
+                  <IonLabel>{robot.ip}</IonLabel>
+                  <IonLabel>{robot.rosVersion}</IonLabel>
+                  <IonLabel>{robot.name}</IonLabel>
+                  <IonLabel>
+                    {robot.status === 'connected' ? (
+                      <IonIcon icon={checkmarkCircle} color="success" />
+                    ) : (
+                      <IonIcon icon={closeCircle} color="danger" />
+                    )}
+                  </IonLabel>
+                  <div className="actions-container">
+                    <IonButton className="action-button" onClick={() => handleEditClick(robot)}>
+                      <IonIcon icon={pencil} />
+                    </IonButton>
+                    <IonButton className="action-button" onClick={() => handleDeleteClick(robot)}>
+                      <IonIcon icon={trash} />
+                    </IonButton>
+                  </div>
+                </div>
+              ))}
+            </IonList>
+          </div>
         </IonCol>
 
-        <IonModal isOpen={showModal}>
+        <IonModal isOpen={showModal} cssClass="modal-content">
           <IonHeader>
             <IonToolbar>
               <IonTitle>{isAdding ? 'Ajouter un Robot' : 'Modifier un Robot'}</IonTitle>
@@ -164,49 +178,72 @@ const RobotList: React.FC = () => {
                 handleSave();
               }}
             >
-              {!isAdding && (
+              {isAdding ? (
                 <IonItem>
                   <IonLabel position="floating">Adresse IP</IonLabel>
-                  <IonInput value={selectedRobot?.ip || ''} readonly />
+                  <IonInput
+                    className="modal-input"
+                    value={ip}
+                    onIonChange={(e) => setIp(e.detail.value!)}
+                    required
+                  />
                 </IonItem>
-              )}
-               {isAdding && (
+              ) : (
                 <IonItem>
                   <IonLabel position="floating">Adresse IP</IonLabel>
-                  <IonInput value={ip}  onIonChange={(e) => setIp(e.detail.value!)}
-                  required />
+                  <IonInput className="modal-input" value={selectedRobot?.ip || ''} readonly />
                 </IonItem>
               )}
-               {!isAdding && (
+              {isAdding ? (
                 <IonItem>
-                  <IonLabel position="floating">Ros Version</IonLabel>
-                  <IonInput value={selectedRobot?.rosVersion || ''} readonly />
+                  <IonLabel position="floating">Version ROS</IonLabel>
+                  <IonInput
+                    className="modal-input"
+                    value={rosVersion}
+                    onIonChange={(e) => setRosVersion(e.detail.value!)}
+                    required
+                  />
                 </IonItem>
-              )}
-               {isAdding && (
+              ) : (
                 <IonItem>
-                  <IonLabel position="floating">Ros Version</IonLabel>
-                  <IonInput value={rosVersion}  onIonChange={(e) => setRosVersion(e.detail.value!)}
-                  required />
+                  <IonLabel position="floating">Version ROS</IonLabel>
+                  <IonInput className="modal-input" value={selectedRobot?.rosVersion || ''} readonly />
                 </IonItem>
               )}
               <IonItem>
                 <IonLabel position="floating">Nom du Robot</IonLabel>
                 <IonInput
+                  className="modal-input"
                   value={name}
                   onIonChange={(e) => setName(e.detail.value!)}
                   required
                 />
               </IonItem>
+              {isAdding ? (
               <IonItem>
-                <IonLabel position="floating">Status du Robot</IonLabel>
+                <IonLabel position="floating">Statut</IonLabel>
                 <IonInput
+                  className="modal-input"
                   value={status}
                   onIonChange={(e) => setStatus(e.detail.value!)}
-                  required
                 />
               </IonItem>
-              <IonButton expand="full" type="submit" disabled={!name.trim() || !status.trim()}>
+               ) : (
+                <IonItem>
+                <IonLabel position="floating">Statut</IonLabel>
+                <IonInput
+                  className="modal-input"
+                  value={status}
+                  readonly
+                />
+              </IonItem>
+              )}
+              <IonButton
+                className="save-button"
+                expand="full"
+                type="submit"
+                disabled={!name.trim() || (isAdding && (!ip.trim() || !rosVersion.trim()||!status.trim() ))}
+              >
                 {isAdding ? 'Ajouter' : 'Modifier'}
               </IonButton>
             </form>
